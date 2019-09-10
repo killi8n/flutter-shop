@@ -5,6 +5,6 @@ const router = new Router();
 
 router.post('/', customersCtrl.createCustomer);
 router.get('/:id', customersCtrl.searchCustomer);
-router.put('/:id', customersCtrl.updateCustomer);
+router.put('/', customersCtrl.updateCustomer);
 
 module.exports = router;
