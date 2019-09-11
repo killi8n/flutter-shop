@@ -1,4 +1,5 @@
 import 'package:client/utils/Global.dart';
+import 'package:client/widgets/ItemList.dart';
 import 'package:client/widgets/Profile.dart';
 import 'package:flutter/material.dart';
 
@@ -42,7 +43,7 @@ class _MainWidgetState extends State<MainWidget> {
         appBar: appBar,
         body: TabBarView(
           children: <Widget>[
-            Text('Item List', style: TextStyle(fontSize: 15.0)),
+            ItemList(),
             Text('Cart', style: TextStyle(fontSize: 15.0)),
             Profile()
           ],
