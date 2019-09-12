@@ -1,3 +1,4 @@
+import 'package:client/widgets/MainWidget.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -44,7 +45,9 @@ class _LoginState extends State<Login> {
               children: <Widget>[
                 FlatButton(
                   onPressed: () async {
-                    await Navigator.pushNamed(context, '/main');
+                    // await Navigator.pushNamed(context, '/main');
+                    await Navigator.push(context,
+                        MaterialPageRoute(builder: (ctx) => MainWidget()));
                   },
                   child: Text('sign in'),
                 ),

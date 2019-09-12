@@ -5,6 +5,8 @@ class ItemInfo {
   String title;
   String description;
   String price;
+  List<String> detailContents;
 
-  ItemInfo(this.image, this.title, this.description, this.price);
+  ItemInfo(this.image, this.title, this.description, this.price,
+      this.detailContents);
 }
