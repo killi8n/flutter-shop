@@ -53,97 +53,106 @@ class _ItemDetailState extends State<ItemDetail> {
 
     return Scaffold(
       appBar: AppBar(title: Text('상품 상세')),
-      body: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            Container(
-                margin: EdgeInsets.all(30),
-                width: double.infinity,
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: <Widget>[
-                      Center(
-                        child: FractionallySizedBox(
-                          widthFactor: 0.8,
-                          child: itemInfo.image,
-                        ),
-                      ),
-                      SizedBox(
-                        height: 20.0,
-                      ),
-                      Text(
-                        itemInfo.title,
-                        style: TextStyle(fontSize: 20.0),
-                      ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        itemInfo.description,
-                        style: TextStyle(fontSize: 15.0, color: Colors.black54),
-                      ),
-                      SizedBox(height: 10.0),
-                      Text(
-                        itemInfo.price,
-                        style: TextStyle(fontSize: 18.0, color: Colors.orange),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(30),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                              itemInfo.detailContents.map<Widget>((content) {
-                            return Container(
-                              margin: EdgeInsets.only(top: 5),
-                              child: Text(content,
-                                  style: TextStyle(fontSize: 15.0)),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.only(left: 30, right: 30),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            SizedBox(
-                              width: 60.0,
-                              child: TextField(
-                                keyboardType: TextInputType.numberWithOptions(),
-                                inputFormatters: [
-                                  WhitelistingTextInputFormatter.digitsOnly
-                                ],
-                                textAlign: TextAlign.center,
-                                decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    contentPadding: EdgeInsets.all(9)),
-                              ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  Container(
+                      margin: EdgeInsets.all(30),
+                      width: double.infinity,
+                      child: Column(
+                        children: <Widget>[
+                          Center(
+                            child: FractionallySizedBox(
+                              widthFactor: 0.8,
+                              child: itemInfo.image,
                             ),
-                            SizedBox(width: 5.0),
-                            Text('개', style: TextStyle(fontSize: 16)),
-                            Expanded(
-                              child: SizedBox(),
+                          ),
+                          SizedBox(
+                            height: 20.0,
+                          ),
+                          Text(
+                            itemInfo.title,
+                            style: TextStyle(fontSize: 20.0),
+                          ),
+                          SizedBox(height: 10.0),
+                          Text(
+                            itemInfo.description,
+                            style: TextStyle(
+                                fontSize: 15.0, color: Colors.black54),
+                          ),
+                          SizedBox(height: 10.0),
+                          Text(
+                            itemInfo.price,
+                            style:
+                                TextStyle(fontSize: 18.0, color: Colors.orange),
+                          ),
+                          Container(
+                            padding: EdgeInsets.all(30),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: itemInfo.detailContents
+                                  .map<Widget>((content) {
+                                return Container(
+                                  margin: EdgeInsets.only(top: 5),
+                                  child: Text(content,
+                                      style: TextStyle(fontSize: 15.0)),
+                                );
+                              }).toList(),
                             ),
-                            Text('10,000원',
-                                style: TextStyle(
-                                    fontSize: 18, color: Colors.orange))
-                          ],
-                        ),
-                      ),
-                      Container(
-                          width: double.infinity,
-                          margin: EdgeInsets.fromLTRB(30, 5, 30, 8),
-                          child: FlatButton(
-                            color: Colors.blue,
-                            textColor: Colors.white,
-                            padding: EdgeInsets.only(top: 10, bottom: 10),
-                            child: Text('장바구니에 넣기',
-                                style: TextStyle(fontSize: 16)),
-                            onPressed: () {},
-                          ))
+                          ),
+                        ],
+                      ))
+                ],
+              ),
+            ),
+          ),
+          Container(
+            height: 10.0,
+            decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: Colors.black54))),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 30, right: 30),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                SizedBox(
+                  width: 60.0,
+                  child: TextField(
+                    keyboardType: TextInputType.numberWithOptions(),
+                    inputFormatters: [
+                      WhitelistingTextInputFormatter.digitsOnly
                     ],
+                    textAlign: TextAlign.center,
+                    decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        contentPadding: EdgeInsets.all(9)),
                   ),
-                ))
-          ],
-        ),
+                ),
+                SizedBox(width: 5.0),
+                Text('개', style: TextStyle(fontSize: 16)),
+                Expanded(
+                  child: SizedBox(),
+                ),
+                Text('10,000원',
+                    style: TextStyle(fontSize: 18, color: Colors.orange))
+              ],
+            ),
+          ),
+          Container(
+              width: double.infinity,
+              margin: EdgeInsets.fromLTRB(30, 5, 30, 8),
+              child: FlatButton(
+                color: Colors.blue,
+                textColor: Colors.white,
+                padding: EdgeInsets.only(top: 10, bottom: 10),
+                child: Text('장바구니에 넣기', style: TextStyle(fontSize: 16)),
+                onPressed: () {},
+              ))
+        ],
       ),
     );
   }

@@ -18,20 +18,20 @@ class _LoginState extends State<Login> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                Text('Flutter Shop', style: TextStyle(fontSize: 50.0)),
+                Text('Flutter Shop', style: TextStyle(fontSize: 40.0)),
                 Container(width: 10.0),
                 Icon(Icons.pets)
               ],
             ),
             Container(height: 30.0),
             FractionallySizedBox(
-              widthFactor: 0.5,
+              widthFactor: 0.6,
               child: TextField(
                 decoration: InputDecoration(hintText: 'Please enter an email'),
               ),
             ),
             FractionallySizedBox(
-              widthFactor: 0.5,
+              widthFactor: 0.6,
               child: TextField(
                 decoration:
                     InputDecoration(hintText: 'Please enter a password'),

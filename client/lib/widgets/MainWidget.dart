@@ -1,4 +1,5 @@
 import 'package:client/utils/Global.dart';
+import 'package:client/widgets/Cart.dart';
 import 'package:client/widgets/ItemList.dart';
 import 'package:client/widgets/Profile.dart';
 import 'package:flutter/material.dart';
@@ -42,11 +43,7 @@ class _MainWidgetState extends State<MainWidget> {
       child: Scaffold(
         appBar: appBar,
         body: TabBarView(
-          children: <Widget>[
-            ItemList(),
-            Text('Cart', style: TextStyle(fontSize: 15.0)),
-            Profile()
-          ],
+          children: <Widget>[ItemList(), Cart(), Profile()],
         ),
       ),
     );

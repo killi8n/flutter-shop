@@ -151,10 +151,13 @@ class _ItemListState extends State<ItemList> {
               },
               child: Row(
                 children: <Widget>[
-                  Container(
-                      height: 150.0,
-                      margin: EdgeInsets.only(right: 20),
-                      child: itemInfo.image),
+                  Flexible(
+                    flex: 1,
+                    child: Container(
+                        height: 150.0,
+                        margin: EdgeInsets.only(right: 20),
+                        child: itemInfo.image),
+                  ),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
