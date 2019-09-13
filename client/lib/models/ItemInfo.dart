@@ -4,7 +4,7 @@ class ItemInfo {
   Image image;
   String title;
   String description;
-  String price;
+  int price;
   List<String> detailContents;
 
   ItemInfo(this.image, this.title, this.description, this.price,

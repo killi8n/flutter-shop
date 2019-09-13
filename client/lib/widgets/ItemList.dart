@@ -1,6 +1,7 @@
 import 'package:client/models/ItemInfo.dart';
 import 'package:client/widgets/ItemDetail.dart';
 import 'package:flutter/material.dart';
+import 'package:client/utils/StringUtil.dart';
 
 class ItemList extends StatefulWidget {
   @override
@@ -8,7 +9,7 @@ class ItemList extends StatefulWidget {
 }
 
 class _ItemListState extends State<ItemList> {
-  List<ItemInfo> itemInfos = null;
+  List<ItemInfo> itemInfos;
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _ItemListState extends State<ItemList> {
             'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg'),
         '뼈다귀 모양 베개',
         '우리 귀여운 강아지에게 꿀잠을!!',
-        '10,000원',
+        10000,
         <String>[
           '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
           '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -51,7 +52,7 @@ class _ItemListState extends State<ItemList> {
             'https://mi6.rightinthebox.com/images/384x384/201704/pqf1493005948537.jpg'),
         '빨간 스웨터',
         '추운 겨울에도 식지 않는 정열의 레드',
-        '8,000원',
+        8000,
         <String>[
           '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
           '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -69,7 +70,7 @@ class _ItemListState extends State<ItemList> {
             'http://mblogthumb4.phinf.naver.net/20120901_223/dogtalk__1346433364891VL4Am_JPEG/0003-MMF0017_s.jpg?type=w2'),
         '말랑말랑 입마개',
         '부드럽고 엣지 있는 입마개',
-        '6,000원',
+        6000,
         <String>[
           '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
           '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -87,7 +88,7 @@ class _ItemListState extends State<ItemList> {
             'http://yogipet.co.kr/web/product/big/201706/yogi_main_500.jpg'),
         '소형견용 애견 화장실',
         '배변 교육이 쉬운 마법의 화장실',
-        '20,000원',
+        20000,
         <String>[
           '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
           '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -105,7 +106,7 @@ class _ItemListState extends State<ItemList> {
             'https://seoul-p-studio.bunjang.net/product/81561624_3_1520763876_w640.jpg'),
         '강아지 용 백팩',
         '이제 네 짐은 네가 지도록 하여라~',
-        '18,000원',
+        18000,
         <String>[
           '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
           '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -123,7 +124,7 @@ class _ItemListState extends State<ItemList> {
             'https://mi7.rightinthebox.com/images/384x384/201307/khabye1372647520194.jpg'),
         '귀여운 강아지 신발',
         '소중한 아기의 발바닥을 보호합시다',
-        '12,000원',
+        12000,
         <String>[
           '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
           '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -171,7 +172,7 @@ class _ItemListState extends State<ItemList> {
                           style: TextStyle(fontSize: 15, color: Colors.black54),
                         ),
                         Text(
-                          itemInfo.price,
+                          '${StringUtil.makeCommaedString(itemInfo.price)}원',
                           style: TextStyle(fontSize: 15, color: Colors.orange),
                         )
                       ],

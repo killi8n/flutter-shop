@@ -1,6 +1,7 @@
 import 'package:client/models/ItemInfo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:client/utils/StringUtil.dart';
 
 class ItemDetail extends StatefulWidget {
   @override
@@ -8,18 +9,23 @@ class ItemDetail extends StatefulWidget {
 }
 
 class _ItemDetailState extends State<ItemDetail> {
-  ItemInfo itemInfo = null;
+  ItemInfo itemInfo;
+  final countController = TextEditingController(text: '1');
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    countController.addListener(() {
+      setState(() {});
+    });
   }
 
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
+    countController.dispose();
   }
 
   void initItemInfo() {
@@ -32,7 +38,7 @@ class _ItemDetailState extends State<ItemDetail> {
           'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg'),
       '뼈다귀 모양 베개',
       '우리 귀여운 강아지에게 꿀잠을!!',
-      '10,000원',
+      10000,
       <String>[
         '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
         '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
@@ -45,6 +51,12 @@ class _ItemDetailState extends State<ItemDetail> {
         '테스트 라인 입니다',
       ],
     );
+  }
+
+  String computeTotalPrice() {
+    final count =
+        (countController.text == '') ? 0 : int.parse(countController.text);
+    return StringUtil.makeCommaedString(itemInfo.price * count);
   }
 
   @override
@@ -85,7 +97,7 @@ class _ItemDetailState extends State<ItemDetail> {
                           ),
                           SizedBox(height: 10.0),
                           Text(
-                            itemInfo.price,
+                            '${StringUtil.makeCommaedString(itemInfo.price)}원',
                             style:
                                 TextStyle(fontSize: 18.0, color: Colors.orange),
                           ),
@@ -122,6 +134,7 @@ class _ItemDetailState extends State<ItemDetail> {
                 SizedBox(
                   width: 60.0,
                   child: TextField(
+                    controller: countController,
                     keyboardType: TextInputType.numberWithOptions(),
                     inputFormatters: [
                       WhitelistingTextInputFormatter.digitsOnly
@@ -137,7 +150,7 @@ class _ItemDetailState extends State<ItemDetail> {
                 Expanded(
                   child: SizedBox(),
                 ),
-                Text('10,000원',
+                Text('${computeTotalPrice()}원',
                     style: TextStyle(fontSize: 18, color: Colors.orange))
               ],
             ),
