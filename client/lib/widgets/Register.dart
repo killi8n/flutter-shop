@@ -1,5 +1,9 @@
+import 'dart:convert';
+
+import 'package:client/utils/Global.dart';
 import 'package:client/widgets/LoadingWrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class Register extends StatefulWidget {
   @override
@@ -122,8 +126,25 @@ class _RegisterState extends State<Register> {
 
                         await Future.delayed(Duration(seconds: 2));
 
-                        scaffoldKey.currentState.showSnackBar(
-                            SnackBar(content: Text('요청이 실패했습니다.')));
+                        final res = await http.post(
+                            Global.localServerAddress + '/api/customers',
+                            body: {
+                              'values': json.encode({
+                                'email': emailController.text,
+                                'name': nameController.text,
+                                'address': addressController.text,
+                                'password': passwordController.text
+                              })
+                            });
+
+                        if (res.statusCode ~/ 100 == 2) {
+                          Navigator.pop(context, null);
+                          return;
+                        }
+
+                        scaffoldKey.currentState.showSnackBar(SnackBar(
+                            content: Text(
+                                '요청이 실패했습니다.\n${json.decode(res.body)['message']}')));
 
                         this.setState(() {
                           isSubmittable = true;
