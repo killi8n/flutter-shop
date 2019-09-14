@@ -1,4 +1,5 @@
 import 'package:client/widgets/MainWidget.dart';
+import 'package:client/widgets/Register.dart';
 import 'package:flutter/material.dart';
 
 class Login extends StatefulWidget {
@@ -52,7 +53,10 @@ class _LoginState extends State<Login> {
                   child: Text('sign in'),
                 ),
                 FlatButton(
-                  onPressed: () {},
+                  onPressed: () async {
+                    await Navigator.push(context,
+                        MaterialPageRoute(builder: (ctx) => Register()));
+                  },
                   child: Text('sign up'),
                 )
               ],
