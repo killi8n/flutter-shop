@@ -1,3 +1,4 @@
+import 'package:client/widgets/LoadingWrapper.dart';
 import 'package:flutter/material.dart';
 
 class Register extends StatefulWidget {
@@ -50,7 +51,7 @@ class _RegisterState extends State<Register> {
       {
         'title': '이름',
         'controller': nameController,
-        'validator': (value) => (value.isEmpty) ? '내용을 입력 해 주세요' : null
+        'validator': (value) => (value.isEmpty) ? '내용을 입력 해 주세요' : null,
       },
       {
         'title': '주소',
@@ -71,6 +72,7 @@ class _RegisterState extends State<Register> {
                   SizedBox(width: 60, child: Text(input['title'])),
                   Expanded(
                     child: TextFormField(
+                      obscureText: input['title'] == '비밀번호' ? true : false,
                       controller: input['controller'],
                       validator: input['validator'],
                       keyboardType: TextInputType.text,
@@ -140,6 +142,12 @@ class _RegisterState extends State<Register> {
         ),
       ),
     );
-    return Scaffold(appBar: appBar, body: form, key: scaffoldKey);
+    return Scaffold(
+        appBar: appBar,
+        body: LoadingWrapper(
+          child: form,
+          isLoading: !isSubmittable,
+        ),
+        key: scaffoldKey);
   }
 }
