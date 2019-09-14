@@ -9,13 +9,31 @@ class MainWidget extends StatefulWidget {
   _MainWidgetState createState() => _MainWidgetState();
 }
 
-class _MainWidgetState extends State<MainWidget> {
+class _MainWidgetState extends State<MainWidget>
+    with SingleTickerProviderStateMixin {
+  TabController tabController;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    tabController.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = AppBar(
       automaticallyImplyLeading: false,
       flexibleSpace: SafeArea(
         child: TabBar(
+          controller: tabController,
           tabs: <Widget>[
             Tab(
               icon: Icon(Icons.shopping_basket),
@@ -38,13 +56,19 @@ class _MainWidgetState extends State<MainWidget> {
     Global.statusBarHeight = mq.padding.top;
     Global.appBarHeight = appBar.preferredSize.height;
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: appBar,
-        body: TabBarView(
-          children: <Widget>[ItemList(), Cart(), Profile()],
-        ),
+    return Scaffold(
+      appBar: appBar,
+      body: TabBarView(
+        controller: tabController,
+        children: <Widget>[
+          ItemList(
+            onAddToCart: () {
+              tabController.animateTo(1);
+            },
+          ),
+          Cart(),
+          Profile()
+        ],
       ),
     );
   }

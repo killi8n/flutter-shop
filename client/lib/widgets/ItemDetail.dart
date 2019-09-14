@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:client/utils/StringUtil.dart';
 
+enum ItemDetailResult { BACK, ADD_TO_CART }
+
 class ItemDetail extends StatefulWidget {
   @override
   _ItemDetailState createState() => _ItemDetailState();
@@ -163,7 +165,9 @@ class _ItemDetailState extends State<ItemDetail> {
                 textColor: Colors.white,
                 padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text('장바구니에 넣기', style: TextStyle(fontSize: 16)),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.pop(context, ItemDetailResult.ADD_TO_CART);
+                },
               ))
         ],
       ),
