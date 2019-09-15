@@ -1,12 +1,74 @@
+const Joi = require('joi');
 const { query } = require('../../lib/mysql');
+const { encryptPassword, checkPassword } = require('../../lib/password');
 
 exports.createCustomer = async ctx => {
-    try {
-        const createdUser = await query('INSERT INTO');
+    let schema = Joi.object().keys({
+        values: Joi.string().required(),
+    });
 
-        ctx.status = 200;
+    let validation = Joi.validate(ctx.request.body, schema);
+
+    if (validation.error) {
+        ctx.status = 400;
         ctx.body = {
-            success: true,
+            message: validation.error.details[0].message,
+        };
+        return;
+    }
+
+    schema = Joi.object().keys({
+        email: Joi.string()
+            .email()
+            .required(),
+        name: Joi.string().required(),
+        address: Joi.string().required(),
+        password: Joi.string()
+            .min(6)
+            .max(16)
+            .alphanum()
+            .required(),
+    });
+
+    validation = Joi.validate(JSON.parse(ctx.request.body.values), schema);
+
+    if (validation.error) {
+        ctx.status = 400;
+        ctx.body = {
+            message: validation.error.details[0].message,
+        };
+        return;
+    }
+
+    const { email, name, address, password } = JSON.parse(
+        ctx.request.body.values
+    );
+
+    try {
+        const existing = await query('SELECT * FROM USER WHERE email = ?', [
+            email,
+        ]);
+        if (existing && existing.length > 0) {
+            ctx.status = 409;
+            ctx.body = {
+                message: '이미 존재하는 이메일 입니다.',
+            };
+            return;
+        }
+        const encrypted = encryptPassword(password);
+
+        const user = await query(
+            'INSERT INTO USER (email, name, address, password) VALUES (?, ?, ?, ?)',
+            [email, name, address, encrypted]
+        );
+
+        if (user && user.affectedRows === 1) {
+            ctx.status = 200;
+            return;
+        }
+        ctx.status = 500;
+        ctx.body = {
+            message: '회원가입이 완료되지 않았습니다. 다시 시도해주세요',
         };
     } catch (e) {
         console.log(e);

@@ -8,31 +8,25 @@ const {
     MYSQL_DATABASE: database,
 } = process.env;
 
-const connect = () => {
+const pool = mysql.createPool({
+    connectionLimit: 10,
+    host,
+    user,
+    password,
+    database,
+});
+
+exports.query = (query, params) => {
     return new Promise((resolve, reject) => {
-        if (!host || !user || !password || !database) {
-            reject();
-        }
-        const connection = mysql.createConnection({
-            host,
-            user,
-            password,
-            database,
+        if (!pool) reject();
+
+        pool.getConnection((err, conn) => {
+            if (err) reject(err);
+            conn.query(query, params, (err, results) => {
+                if (err) reject(err);
+                conn.release();
+                resolve(results);
+            });
         });
-
-        connection.connect();
-
-        resolve(connection);
     });
-};
-
-exports.query = async (query, params) => {
-    try {
-        const conn = await connect();
-        const 
-        const res = conn.query(query);
-        return res;
-    } catch (e) {
-        console.log(e);
-    }
 };
