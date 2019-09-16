@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const { JWT_SECRET: secret } = process.env;
 
-const generateToken = payload => {
+exports.generateToken = payload => {
     return new Promise((resolve, reject) => {
         if (!payload) reject();
         const token = jwt.sign(payload, secret, {

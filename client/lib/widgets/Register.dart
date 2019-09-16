@@ -4,6 +4,7 @@ import 'package:client/utils/Global.dart';
 import 'package:client/widgets/LoadingWrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:client/utils/API.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -35,6 +36,36 @@ class _RegisterState extends State<Register> {
     passwordController.dispose();
     nameController.dispose();
     addressController.dispose();
+  }
+
+  Future<void> register() async {
+    try {
+      if (formKey.currentState.validate() == false) {
+        return;
+      }
+
+      this.setState(() {
+        isSubmittable = false;
+      });
+
+      await API.register(emailController.text, nameController.text,
+          addressController.text, passwordController.text);
+
+      Navigator.pop(context, null);
+    } on ServerApiException catch (e) {
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(
+              '요청이 실패했습니다.\n${json.decode(json.decode(e.response.body))['message']}')));
+      this.setState(() {
+        isSubmittable = true;
+      });
+    } catch (e) {
+      scaffoldKey.currentState
+          .showSnackBar(SnackBar(content: Text('에러.\n${e.toString()}')));
+      this.setState(() {
+        isSubmittable = true;
+      });
+    }
   }
 
   @override
@@ -112,48 +143,7 @@ class _RegisterState extends State<Register> {
                     color: Colors.pink,
                     textColor: Colors.white,
                     onPressed: () async {
-                      try {
-                        if (formKey.currentState.validate() == false) {
-                          return;
-                        }
-
-                        this.setState(() {
-                          isSubmittable = false;
-                        });
-
-                        scaffoldKey.currentState.showSnackBar(
-                            SnackBar(content: Text('서버로 전송중입니다.')));
-
-                        await Future.delayed(Duration(seconds: 2));
-
-                        final res = await http.post(
-                            Global.localServerAddress + '/api/customers',
-                            body: {
-                              'values': json.encode({
-                                'email': emailController.text,
-                                'name': nameController.text,
-                                'address': addressController.text,
-                                'password': passwordController.text
-                              })
-                            });
-
-                        if (res.statusCode ~/ 100 == 2) {
-                          Navigator.pop(context, null);
-                          return;
-                        }
-
-                        scaffoldKey.currentState.showSnackBar(SnackBar(
-                            content: Text(
-                                '요청이 실패했습니다.\n${json.decode(res.body)['message']}')));
-
-                        this.setState(() {
-                          isSubmittable = true;
-                        });
-                      } catch (e) {
-                        this.setState(() {
-                          isSubmittable = true;
-                        });
-                      }
+                      await register();
                     },
                   ),
                 )
