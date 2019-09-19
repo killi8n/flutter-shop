@@ -1,8 +1,8 @@
 import 'dart:convert';
-
-import 'package:client/models/LoginResponse.dart';
-import 'package:client/utils/Global.dart';
 import 'package:http/http.dart' as http;
+import 'package:client/utils/Global.dart';
+import 'package:client/models/LoginResponse.dart';
+import 'package:client/models/ItemResponse.dart';
 
 class API {
   static Future<void> register(
@@ -24,9 +24,27 @@ class API {
     return LoginResponse.fromJson(json.decode(res.body)['items'][0]);
   }
 
+  static Future<List<ItemResponse>> fetchItems(
+      Map<String, dynamic> query) async {
+    final res = await get('/api/items', {'options': json.encode(query)});
+    return json
+        .decode(res.body)['items']
+        .map<ItemResponse>((item) => ItemResponse.fromJson(item))
+        .toList();
+  }
+
+  static Future<http.Response> get(
+      String path, Map<String, String> query) async {
+    final uri = Uri(queryParameters: query);
+    final res =
+        await http.get(Global.localServerAddress + path + '?' + uri.query);
+    return requestTail(res);
+  }
+
   static Future<http.Response> post(
       String path, Map<String, String> body) async {
     final res = await http.post(Global.localServerAddress + path, body: body);
+
     return requestTail(res);
   }
 

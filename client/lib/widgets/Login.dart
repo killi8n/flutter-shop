@@ -51,6 +51,8 @@ class _LoginState extends State<Login> {
         isLoading = false;
       });
 
+      Global.items = [];
+
       await Navigator.push(
           context, MaterialPageRoute(builder: (context) => MainWidget()));
     } on ServerApiException catch (e) {

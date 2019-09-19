@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:client/models/ItemInfo.dart';
+import 'package:client/utils/API.dart';
+import 'package:client/utils/Global.dart';
 import 'package:client/widgets/ItemDetail.dart';
 import 'package:flutter/material.dart';
 import 'package:client/utils/StringUtil.dart';
@@ -14,11 +18,56 @@ class ItemList extends StatefulWidget {
 
 class _ItemListState extends State<ItemList> {
   List<ItemInfo> itemInfos;
+  bool isLoading = false;
+
+  void fetchDataAndRefresh() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final items = await API.fetchItems({});
+      await Future.delayed(Duration(seconds: 2));
+      Global.items = items;
+
+      if (this.mounted == false) {
+        return;
+      }
+
+      final newItemsInfos = items
+          .map((item) => ItemInfo(Image.network(item.image), item.title,
+              item.description, item.price, []))
+          .toList();
+
+      setState(() {
+        itemInfos = newItemsInfos;
+        isLoading = false;
+      });
+    } on ServerApiException catch (e) {
+      final msg = json.decode(e.response.body)['message'];
+      print(msg);
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    itemInfos = Global.items
+        .map((item) => ItemInfo(Image.network(item.image), item.title,
+            item.description, item.price, []))
+        .toList();
+    if (itemInfos.length == 0) {
+      fetchDataAndRefresh();
+    }
   }
 
   @override
