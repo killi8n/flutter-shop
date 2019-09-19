@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'package:client/models/CustomerHasItemResponse.dart';
 import 'package:http/http.dart' as http;
 import 'package:client/utils/Global.dart';
 import 'package:client/models/LoginResponse.dart';
 import 'package:client/models/ItemResponse.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class API {
   static Future<void> register(
@@ -17,7 +19,7 @@ class API {
     });
   }
 
-  static Future<void> signIn(String email, String password) async {
+  static Future<LoginResponse> signIn(String email, String password) async {
     final res = await post('/api/login',
         {'type': 'CUSTOMER', 'loginId': email, 'password': password});
 
@@ -26,18 +28,33 @@ class API {
 
   static Future<List<ItemResponse>> fetchItems(
       Map<String, dynamic> query) async {
-    final res = await get('/api/items', {'options': json.encode(query)});
+    final res = await get('/api/items', {'options': json.encode(query)}, null);
     return json
         .decode(res.body)['items']
         .map<ItemResponse>((item) => ItemResponse.fromJson(item))
         .toList();
   }
 
-  static Future<http.Response> get(
-      String path, Map<String, String> query) async {
+  static Future<List<CustomerHasItemResponse>> fetchCustomerItem(
+      Map<String, dynamic> query) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final res = await get('/api/custom-has-items',
+        {'options': json.encode(query)}, {'authorization': token});
+
+    return json
+        .decode(res.body)['items']
+        .map<CustomerHasItemResponse>(
+            (item) => CustomerHasItemResponse.fromJson(item))
+        .toList();
+  }
+
+  static Future<http.Response> get(String path, Map<String, String> query,
+      Map<String, String> headers) async {
     final uri = Uri(queryParameters: query);
-    final res =
-        await http.get(Global.localServerAddress + path + '?' + uri.query);
+    final res = await http.get(
+        Global.localServerAddress + path + '?' + uri.query,
+        headers: headers != null ? headers : null);
     return requestTail(res);
   }
 

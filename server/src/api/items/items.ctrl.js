@@ -29,6 +29,9 @@ exports.getAllItems = async ctx => {
     } catch (e) {
         console.log(e);
         ctx.status = 500;
+        ctx.body = {
+            message: 'error',
+        };
     }
 };
 

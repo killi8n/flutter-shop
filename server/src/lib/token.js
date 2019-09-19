@@ -3,6 +3,37 @@ const jwt = require('jsonwebtoken');
 
 const { JWT_SECRET: secret } = process.env;
 
+exports.checkToken = async (ctx, next) => {
+    const { authorization: token } = ctx.request.headers;
+    if (!token) {
+        ctx.status = 401;
+        ctx.body = {
+            message: 'no token',
+        };
+
+        return;
+    }
+    try {
+        const decoded = await this.decodeToken(token);
+        if (!decoded) {
+            ctx.status = 401;
+            ctx.body = {
+                message: 'no decoded token',
+            };
+            return;
+        }
+
+        return next();
+    } catch (e) {
+        console.log(e);
+        ctx.body = {
+            message: e.toString(),
+        };
+        ctx.status = 500;
+        return;
+    }
+};
+
 exports.generateToken = payload => {
     return new Promise((resolve, reject) => {
         if (!payload) reject();
@@ -13,7 +44,7 @@ exports.generateToken = payload => {
     });
 };
 
-const decodeToken = token => {
+exports.decodeToken = token => {
     return new Promise((resolve, reject) => {
         if (!token) reject();
         const decoded = jwt.decode(token);

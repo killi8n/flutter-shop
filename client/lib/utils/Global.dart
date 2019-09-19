@@ -1,3 +1,4 @@
+import 'package:client/models/CustomerHasItemResponse.dart';
 import 'package:client/models/ItemResponse.dart';
 
 class Global {
@@ -6,4 +7,5 @@ class Global {
   static String localServerAddress = 'http://127.0.0.1:4000';
 
   static List<ItemResponse> items = [];
+  static List<CustomerHasItemResponse> prevCustomerHasItems = [];
 }

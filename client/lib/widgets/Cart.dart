@@ -1,6 +1,10 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:client/models/CartInfo.dart';
+import 'package:client/utils/API.dart';
+import 'package:client/utils/Global.dart';
+import 'package:client/widgets/LoadingWrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:client/utils/StringUtil.dart';
 import 'package:flutter/services.dart';
@@ -11,12 +15,19 @@ class Cart extends StatefulWidget {
 }
 
 class _CartState extends State<Cart> {
+  bool isLoading = false;
   List<CartInfo> cartInfos;
   final itemIdControllerMap = Map<int, TextEditingController>();
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    cartInfos = Global.prevCustomerHasItems
+        .map((item) => CartInfo(item.id, Image.network(item.item.image),
+            item.item.title, item.item.price, item.count))
+        .toList();
+    fetchDataAndRefresh();
   }
 
   @override
@@ -29,67 +40,79 @@ class _CartState extends State<Cart> {
     itemIdControllerMap.clear();
   }
 
-  void initCartInfos() {
-    if (cartInfos != null) {
-      return;
+  void fetchDataAndRefresh() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final customerHasItems = await API.fetchCustomerItem({
+        'where': {'status': 'CART'},
+        'include': [
+          {'association': 'item'}
+        ]
+      });
+
+      await Future.delayed(Duration(seconds: 1));
+      Global.prevCustomerHasItems = customerHasItems;
+
+      if (!mounted) {
+        return;
+      }
+
+      final newItemsInfos = customerHasItems
+          .map((item) => CartInfo(item.id, Image.network(item.item.image),
+              item.item.title, item.item.price, item.count))
+          .toList();
+
+      setState(() {
+        refreshItemIdControllerMap(newItemsInfos);
+        isLoading = false;
+        cartInfos = newItemsInfos;
+      });
+    } on ServerApiException catch (e) {
+      final msg = json.decode(e.response.body)['message'];
+      print(msg);
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        isLoading = false;
+      });
     }
+  }
 
-    cartInfos = <CartInfo>[
-      CartInfo(
-          0,
-          Image.network(
-              'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg'),
-          '뼈다귀 모양 베개',
-          10000,
-          1),
-      CartInfo(
-          1,
-          Image.network(
-              'https://mi6.rightinthebox.com/images/384x384/201704/pqf1493005948537.jpg'),
-          '빨간 스웨터',
-          8000,
-          2),
-      CartInfo(
-          2,
-          Image.network(
-              'https://seoul-p-studio.bunjang.net/product/81561624_3_1520763876_w640.jpg'),
-          '강아지 용 백팩',
-          18000,
-          3),
-      CartInfo(
-          3,
-          Image.network(
-              'https://mi7.rightinthebox.com/images/384x384/201307/khabye1372647520194.jpg'),
-          '귀여운 강아지 신발',
-          12000,
-          1),
-    ];
-
+  void refreshItemIdControllerMap(List<CartInfo> cartInfos) {
     for (final info in cartInfos) {
+      if (itemIdControllerMap.containsKey(info.id)) {
+        itemIdControllerMap[info.id].text = '${info.count}';
+        continue;
+      }
+
       final controller = TextEditingController(text: '${info.count}');
-      itemIdControllerMap[info.id] = controller;
       controller.addListener(() {
         setState(() {
           info.count = (controller.text == '') ? 0 : int.parse(controller.text);
         });
       });
+      itemIdControllerMap[info.id] = controller;
     }
   }
 
-  String computeTotalPrice() {
-    var totalPrice = 0;
-    for (final cartInfo in cartInfos) {
-      final controller = itemIdControllerMap[cartInfo.id];
-      final count = (controller.text == '') ? 0 : int.parse(controller.text);
-      totalPrice += count * cartInfo.price;
-    }
-    return '${StringUtil.makeCommaedString(totalPrice)}원';
-  }
+  // String computeTotalPrice() {
+  //   var totalPrice = 0;
+  //   for (final cartInfo in cartInfos) {
+  //     final controller = itemIdControllerMap[cartInfo.id];
+  //     final count = (controller.text == '') ? 0 : int.parse(controller.text);
+  //     totalPrice += count * cartInfo.price;
+  //   }
+  //   return '${StringUtil.makeCommaedString(totalPrice)}원';
+  // }
 
   @override
   Widget build(BuildContext context) {
-    initCartInfos();
-
     final cartList = cartInfos
         .map((info) => Row(
               children: <Widget>[
@@ -200,50 +223,54 @@ class _CartState extends State<Cart> {
             ))
         .toList();
 
-    return Scaffold(
-      body: Column(
-        children: <Widget>[
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                children: cartList,
+    return LoadingWrapper(
+      isLoading: isLoading,
+      child: Scaffold(
+        body: Column(
+          children: <Widget>[
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: cartList,
+                ),
               ),
             ),
-          ),
-          Container(
-            height: 3.0,
-            decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colors.black54))),
-          ),
-          Container(
-            padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-            child: Column(
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Text('총 가격:'),
-                    Expanded(
-                      child: SizedBox(),
-                    ),
-                    Text(
-                      '${computeTotalPrice()}',
-                      style: TextStyle(color: Colors.orangeAccent),
-                    )
-                  ],
-                ),
-                FractionallySizedBox(
-                  child: FlatButton(
-                    child: Text('구매하기'),
-                    onPressed: () {},
-                    color: Colors.pinkAccent,
-                    textColor: Colors.white,
-                  ),
-                  widthFactor: 1.0,
-                )
-              ],
+            Container(
+              height: 3.0,
+              decoration: BoxDecoration(
+                  border: Border(top: BorderSide(color: Colors.black54))),
             ),
-          )
-        ],
+            Container(
+              padding:
+                  EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+              child: Column(
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Text('총 가격:'),
+                      Expanded(
+                        child: SizedBox(),
+                      ),
+                      Text(
+                        '${StringUtil.makeCommaedString(cartInfos.where((cart) => cart.isChecked).map((cart) => cart.price * cart.count).fold(0, (a, b) => a + b))}원',
+                        style: TextStyle(color: Colors.orangeAccent),
+                      )
+                    ],
+                  ),
+                  FractionallySizedBox(
+                    child: FlatButton(
+                      child: Text('구매하기'),
+                      onPressed: () {},
+                      color: Colors.pinkAccent,
+                      textColor: Colors.white,
+                    ),
+                    widthFactor: 1.0,
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

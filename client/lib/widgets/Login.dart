@@ -6,7 +6,7 @@ import 'package:client/widgets/LoadingWrapper.dart';
 import 'package:client/widgets/MainWidget.dart';
 import 'package:client/widgets/Register.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Login extends StatefulWidget {
   @override
@@ -46,10 +46,15 @@ class _LoginState extends State<Login> {
         isLoading = true;
       });
 
-      await API.signIn(emailController.text, passwordController.text);
+      final res =
+          await API.signIn(emailController.text, passwordController.text);
       setState(() {
         isLoading = false;
       });
+
+      final token = res.token;
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.setString('token', token);
 
       Global.items = [];
 
