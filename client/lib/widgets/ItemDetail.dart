@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:client/models/ItemInfo.dart';
+import 'package:client/utils/Global.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:client/utils/StringUtil.dart';
@@ -6,6 +9,10 @@ import 'package:client/utils/StringUtil.dart';
 enum ItemDetailResult { BACK, ADD_TO_CART }
 
 class ItemDetail extends StatefulWidget {
+  int itemId;
+
+  ItemDetail({Key key, @required this.itemId}) : super(key: key);
+
   @override
   _ItemDetailState createState() => _ItemDetailState();
 }
@@ -18,6 +25,9 @@ class _ItemDetailState extends State<ItemDetail> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    itemInfo = makeItemInfo(widget.itemId);
+
     countController.addListener(() {
       setState(() {});
     });
@@ -30,30 +40,48 @@ class _ItemDetailState extends State<ItemDetail> {
     countController.dispose();
   }
 
-  void initItemInfo() {
-    if (itemInfo != null) {
-      return;
+  ItemInfo makeItemInfo(int itemId) {
+    if (itemId == null) return null;
+    final item = Global.items.firstWhere((item) => item.id == itemId);
+    if (item == null) return null;
+
+    final detailContents = <String>[];
+    for (final content in json.decode(item.detailContents)) {
+      detailContents.add(content);
     }
 
-    itemInfo = ItemInfo(
-      Image.network(
-          'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg'),
-      '뼈다귀 모양 베개',
-      '우리 귀여운 강아지에게 꿀잠을!!',
-      10000,
-      <String>[
-        '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
-        '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
-        '가나다라 마바사 아자차카 타파하',
-        '',
-        '테스트 라인 입니다',
-        '테스트 라인 입니다',
-        '테스트 라인 입니다',
-        '테스트 라인 입니다',
-        '테스트 라인 입니다',
-      ],
-    );
+    // final detailContents = json
+    //     .decode((item.detailContents))
+    //     .map((detailContent) => detailContent);
+    // print(detailContents);
+    return ItemInfo(item.id, Image.network(item.image), item.title,
+        item.description, item.price, detailContents);
   }
+
+  // void initItemInfo() {
+  //   if (itemInfo != null) {
+  //     return;
+  //   }
+
+  //   itemInfo = ItemInfo(
+  //     Image.network(
+  //         'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg'),
+  //     '뼈다귀 모양 베개',
+  //     '우리 귀여운 강아지에게 꿀잠을!!',
+  //     10000,
+  //     <String>[
+  //       '아이에게 꿀잠을 선사할 수 있는 베개입니다.',
+  //       '뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.',
+  //       '가나다라 마바사 아자차카 타파하',
+  //       '',
+  //       '테스트 라인 입니다',
+  //       '테스트 라인 입니다',
+  //       '테스트 라인 입니다',
+  //       '테스트 라인 입니다',
+  //       '테스트 라인 입니다',
+  //     ],
+  //   );
+  // }
 
   String computeTotalPrice() {
     final count =
@@ -63,8 +91,6 @@ class _ItemDetailState extends State<ItemDetail> {
 
   @override
   Widget build(BuildContext context) {
-    initItemInfo();
-
     return Scaffold(
       appBar: AppBar(title: Text('상품 상세')),
       body: Column(

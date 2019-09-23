@@ -26,7 +26,7 @@ class _ItemListState extends State<ItemList> {
     // TODO: implement initState
     super.initState();
     itemInfos = Global.items
-        .map((item) => ItemInfo(Image.network(item.image), item.title,
+        .map((item) => ItemInfo(item.id, Image.network(item.image), item.title,
             item.description, item.price, []))
         .toList();
     if (itemInfos.length == 0) {
@@ -55,8 +55,8 @@ class _ItemListState extends State<ItemList> {
       }
 
       final newItemsInfos = items
-          .map((item) => ItemInfo(Image.network(item.image), item.title,
-              item.description, item.price, []))
+          .map((item) => ItemInfo(item.id, Image.network(item.image),
+              item.title, item.description, item.price, []))
           .toList();
 
       setState(() {
@@ -202,7 +202,11 @@ class _ItemListState extends State<ItemList> {
         .map((itemInfo) => FlatButton(
               onPressed: () async {
                 final result = await Navigator.push<ItemDetailResult>(
-                    context, MaterialPageRoute(builder: (ctx) => ItemDetail()));
+                    context,
+                    MaterialPageRoute(
+                        builder: (ctx) => ItemDetail(
+                              itemId: itemInfo.id,
+                            )));
                 if (result == ItemDetailResult.ADD_TO_CART) {
                   widget.onAddToCart();
                 }
