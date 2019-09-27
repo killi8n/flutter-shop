@@ -80,10 +80,37 @@ exports.createCustomer = async ctx => {
 };
 
 exports.searchCustomer = async ctx => {
+    const { id } = ctx.params;
+    if (!id) {
+        ctx.body = {
+            message: 'need id',
+        };
+        ctx.status = 400;
+        return;
+    }
     try {
+        const user = await query('SELECT * FROM USER WHERE id = ?', [id]);
+        if (!user) {
+            ctx.status = 404;
+            ctx.body = {
+                message: 'cannot find such user',
+            };
+            return;
+        }
         ctx.status = 200;
         ctx.body = {
-            success: true,
+            message: '',
+            items: [
+                {
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    address: user.address,
+                    phone_number: '010-1234-1234',
+                    createAt: new Date(),
+                    updateAt: new Date(),
+                },
+            ],
         };
     } catch (e) {
         console.log(e);
