@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:client/utils/API.dart';
 import 'package:client/utils/Global.dart';
 import 'package:client/widgets/LoadingWrapper.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +28,13 @@ class _ProfileState extends State<Profile> {
     phoneController = TextEditingController(text: '');
     emailContronller = TextEditingController(text: '');
     addressController = TextEditingController(text: '');
+    if (Global.profile == null) {
+      getProfile();
+    } else {
+      phoneController.text = Global.profile.phoneNumber;
+      emailContronller.text = Global.profile.email;
+      addressController.text = Global.profile.address;
+    }
   }
 
   @override
@@ -35,6 +45,38 @@ class _ProfileState extends State<Profile> {
     phoneController.dispose();
     emailContronller.dispose();
     addressController.dispose();
+  }
+
+  void getProfile() async {
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final res = await API.fetchProfile({});
+
+      phoneController.text = res.phoneNumber;
+      emailContronller.text = res.email;
+      addressController.text = res.address;
+
+      Global.profile = res;
+
+      setState(() {
+        isLoading = false;
+      });
+    } on ServerApiException catch (e) {
+      final msg = json.decode(e.response.body)['message'];
+      setState(() {
+        isLoading = false;
+      });
+      scaffoldKey.currentState.showSnackBar(SnackBar(
+        content: Text('에러${msg}'),
+      ));
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        isLoading = false;
+      });
+    }
   }
 
   @override

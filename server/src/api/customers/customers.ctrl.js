@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const { query } = require('../../lib/mysql');
-const { encryptPassword, checkPassword } = require('../../lib/password');
+const { encryptPassword } = require('../../lib/password');
+const { decodeToken } = require('../../lib/token');
 
 exports.createCustomer = async ctx => {
     let schema = Joi.object().keys({
@@ -80,16 +81,26 @@ exports.createCustomer = async ctx => {
 };
 
 exports.searchCustomer = async ctx => {
-    const { id } = ctx.params;
-    if (!id) {
-        ctx.body = {
-            message: 'need id',
-        };
-        ctx.status = 400;
-        return;
-    }
+    const { authorization: token } = ctx.request.headers;
     try {
-        const user = await query('SELECT * FROM USER WHERE id = ?', [id]);
+        const decoded = await decodeToken(token);
+        if (!decoded) {
+            ctx.status = 401;
+            ctx.body = {
+                message: 'invalid token',
+            };
+            return;
+        }
+        const { id } = decoded;
+        let user = await query('SELECT * FROM USER WHERE id = ?', [id]);
+        if (user.length === 0) {
+            ctx.status = 404;
+            ctx.body = {
+                message: 'cannot find such user',
+            };
+            return;
+        }
+        user = user[0];
         if (!user) {
             ctx.status = 404;
             ctx.body = {
@@ -97,7 +108,9 @@ exports.searchCustomer = async ctx => {
             };
             return;
         }
+
         ctx.status = 200;
+
         ctx.body = {
             message: '',
             items: [
@@ -106,7 +119,7 @@ exports.searchCustomer = async ctx => {
                     email: user.email,
                     name: user.name,
                     address: user.address,
-                    phone_number: '010-1234-1234',
+                    phoneNumber: '010-1234-1234',
                     createAt: new Date(),
                     updateAt: new Date(),
                 },

@@ -14,5 +14,6 @@ module.exports = {
     },
     rules: {
         'require-atomic-updates': 0,
+        'no-useless-escape': 0,
     },
 };

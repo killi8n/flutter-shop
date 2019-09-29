@@ -26,7 +26,7 @@ exports.login = async ctx => {
         return;
     }
 
-    const { type, loginId, password } = ctx.request.body;
+    const { loginId, password } = ctx.request.body;
 
     try {
         const existing = await query('SELECT * FROM USER WHERE email = ?', [

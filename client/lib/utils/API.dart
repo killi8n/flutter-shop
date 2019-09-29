@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:client/models/CustomerHasItemResponse.dart';
+import 'package:client/models/ProfileResponse.dart';
 import 'package:http/http.dart' as http;
 import 'package:client/utils/Global.dart';
 import 'package:client/models/LoginResponse.dart';
@@ -47,6 +48,15 @@ class API {
         .map<CustomerHasItemResponse>(
             (item) => CustomerHasItemResponse.fromJson(item))
         .toList();
+  }
+
+  static Future<ProfileResponse> fetchProfile(
+      Map<String, dynamic> query) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    final res = await get('/api/customers/', {'options': json.encode(query)},
+        {'authorization': token});
+    return ProfileResponse.fromJson(json.decode(res.body)['items'][0]);
   }
 
   static Future<http.Response> get(String path, Map<String, String> query,

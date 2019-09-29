@@ -1,5 +1,6 @@
 import 'package:client/models/CustomerHasItemResponse.dart';
 import 'package:client/models/ItemResponse.dart';
+import 'package:client/models/ProfileResponse.dart';
 
 class Global {
   static double statusBarHeight = 0.0;
@@ -8,4 +9,5 @@ class Global {
 
   static List<ItemResponse> items = [];
   static List<CustomerHasItemResponse> prevCustomerHasItems = [];
+  static ProfileResponse profile = null;
 }
