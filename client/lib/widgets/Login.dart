@@ -26,6 +26,7 @@ class _LoginState extends State<Login> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    this.checkToken();
   }
 
   @override
@@ -34,6 +35,19 @@ class _LoginState extends State<Login> {
     super.dispose();
     emailController.dispose();
     passwordController.dispose();
+  }
+
+  void checkToken() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+      if (token != null) {
+        await Navigator.push(
+            context, MaterialPageRoute(builder: (context) => MainWidget()));
+      }
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   Future<void> handleSignIn() async {
@@ -57,6 +71,7 @@ class _LoginState extends State<Login> {
       prefs.setString('token', token);
 
       Global.items = [];
+      Global.profile = null;
 
       await Navigator.push(
           context, MaterialPageRoute(builder: (context) => MainWidget()));

@@ -79,6 +79,42 @@ class _ProfileState extends State<Profile> {
     }
   }
 
+  void updateProfile() async {
+    if (formKey.currentState.validate() == false) {
+      return;
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      final phoneNumber = phoneController.text;
+      final email = emailContronller.text;
+      final address = addressController.text;
+
+      await API.updateProfile(email, address, phoneNumber);
+
+      this
+          .scaffoldKey
+          .currentState
+          .showSnackBar(SnackBar(content: Text('수정이 완료되었습니다')));
+    } on ServerApiException catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      final msg = json.decode(e.response.body)['message'];
+      this
+          .scaffoldKey
+          .currentState
+          .showSnackBar(SnackBar(content: Text('에러${msg}')));
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mq = MediaQuery.of(context);
@@ -174,6 +210,17 @@ class _ProfileState extends State<Profile> {
                       ],
                     ),
                   ),
+                  Container(
+                    margin: EdgeInsets.only(top: 15.0),
+                    child: FlatButton(
+                      child: Text('수정'),
+                      onPressed: () {
+                        updateProfile();
+                      },
+                      color: Colors.blue,
+                      textColor: Colors.white,
+                    ),
+                  )
                 ],
               ),
             ),

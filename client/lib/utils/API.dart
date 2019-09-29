@@ -54,9 +54,21 @@ class API {
       Map<String, dynamic> query) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    final res = await get('/api/customers/', {'options': json.encode(query)},
+    final res = await get('/api/customers', {'options': json.encode(query)},
         {'authorization': token});
     return ProfileResponse.fromJson(json.decode(res.body)['items'][0]);
+  }
+
+  static Future<void> updateProfile(
+      String email, String address, String phoneNumber) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return await put('/api/customers', {
+      'values': json.encode(
+          {'email': email, 'address': address, 'phoneNumber': phoneNumber})
+    }, {
+      'authorization': token
+    });
   }
 
   static Future<http.Response> get(String path, Map<String, String> query,
@@ -72,6 +84,12 @@ class API {
       String path, Map<String, String> body) async {
     final res = await http.post(Global.localServerAddress + path, body: body);
 
+    return requestTail(res);
+  }
+
+  static Future<http.Response> put(String path, Map<String, String> body,
+      Map<String, String> headers) async {
+    final res = await http.put(Global.localServerAddress + path, body: body);
     return requestTail(res);
   }
 

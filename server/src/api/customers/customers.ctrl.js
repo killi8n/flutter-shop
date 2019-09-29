@@ -131,12 +131,72 @@ exports.searchCustomer = async ctx => {
 };
 
 exports.updateCustomer = async ctx => {
+    console.log('updateCustomer');
+    let schema = Joi.object().keys({
+        values: Joi.string().required(),
+    });
+    let validation = Joi.validate(ctx.request.body, schema);
+    if (validation.error) {
+        console.log('error:', validation.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: '잘못된 정보를 전달하였습니다',
+        };
+        return;
+    }
+
+    let { values } = ctx.request.body;
+    values = JSON.parse(values);
+
+    schema = Joi.object().keys({
+        email: Joi.string()
+            .email()
+            .required(),
+        address: Joi.string().required(),
+        phoneNumber: Joi.string().required(),
+    });
+
+    validation = Joi.validate(values, schema);
+
+    if (validation.error) {
+        console.log('error:', validation.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: '잘못된 정보를 전달하였습니다',
+        };
+        return;
+    }
+
+    const { email, address, phoneNumber } = values;
+    const { authorization: token } = ctx.request.headers;
     try {
+        const decoded = await decodeToken(token);
+        const { id } = decoded;
+
+        const user = await query('SELECT * FROM USER WHERE id = ?', [id]);
+        // console.log(user);
+        if (!user || user.length === 0) {
+            ctx.status = 404;
+            ctx.body = {
+                message: '존재하지 않는 계정입니다',
+            };
+            return;
+        }
+
+        await query(
+            'UPDATE USER email = ?, address = ?, phoneNumber = ? WHERE id = ?',
+            [email, address, phoneNumber, id]
+        );
+
         ctx.status = 200;
         ctx.body = {
             success: true,
         };
     } catch (e) {
         console.log(e);
+        ctx.status = 500;
+        ctx.body = {
+            message: '500',
+        };
     }
 };
