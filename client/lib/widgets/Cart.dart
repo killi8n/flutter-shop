@@ -54,6 +54,8 @@ class _CartState extends State<Cart> {
         ]
       });
 
+      print(customerHasItems);
+
       await Future.delayed(Duration(seconds: 1));
       Global.prevCustomerHasItems = customerHasItems;
 

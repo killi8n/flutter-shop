@@ -1,10 +1,69 @@
+const Joi = require('joi');
 const { decodeToken } = require('../../lib/token');
+const { query } = require('../../lib/mysql');
 
 exports.create = async ctx => {
-    try {
+    console.log('create');
+    const { authorization: token } = ctx.request.headers;
+
+    let schema = Joi.object().keys({
+        values: Joi.string().required(),
+    });
+
+    let validate = Joi.validate(ctx.request.body, schema);
+
+    if (validate.error) {
+        console.log(validate.error);
+        ctx.status = 400;
         ctx.body = {
-            success: true,
+            message: 'invalid body',
         };
+        return;
+    }
+
+    const { values } = ctx.request.body;
+
+    schema = Joi.object().keys({
+        items: Joi.string().required(),
+    });
+
+    validate = Joi.validate(JSON.parse(values), schema);
+
+    if (validate.error) {
+        console.log(validate.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: 'invalid body',
+        };
+        return;
+    }
+
+    const { items } = JSON.parse(values);
+
+    try {
+        const decoded = await decodeToken(token);
+        const { id } = decoded;
+
+        const existing = await query('SELECT * FROM CART WHERE userId = ?', [
+            id,
+        ]);
+
+        if (existing.length === 1) {
+            const existingItems = JSON.parse(existing[0].items);
+            const newItem = JSON.parse(items);
+            const concattedItems = [...existingItems, newItem];
+
+            await query('UPDATE CART SET items = ? WHERE userId = ?', [
+                JSON.stringify(concattedItems),
+                id,
+            ]);
+        } else {
+            await query(`INSERT INTO CART (userId, items) VALUES (?, ?)`, [
+                id,
+                JSON.stringify([JSON.parse(items)]),
+            ]);
+        }
+
         ctx.status = 200;
     } catch (e) {
         console.log(e);
@@ -22,40 +81,53 @@ exports.getAll = async ctx => {
     try {
         const decoded = await decodeToken(token);
         const { id } = decoded;
-        const mockCarts = [
-            {
-                id: 0,
-                customerId: id,
-                itemId: 0,
-                count: 1,
-                status: '',
-                paidDtm: '',
-                createAt: '',
-                updateAt: '',
-                item: {
-                    id: 0,
-                    title: '뼈다귀 모양 베개',
-                    description: '우리 귀여운 강아지에게 꿀잠을!!',
-                    price: 10000,
-                    image:
-                        'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg',
-                    detailContents: `[\"아이에게 꿀잠을 선사할 수 있는 베개입니다.\",
-                    \"뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.\",
-                    \"가나다라 마바사 아자차카 타파하\",
-                    \"\",
-                    \"테스트 라인 입니다\",
-                    \"테스트 라인 입니다\",
-                    \"테스트 라인 입니다\",
-                    \"테스트 라인 입니다\",
-                    \"테스트 라인 입니다\"]`,
-                    createAt: '',
-                    updateAt: '',
-                },
-            },
-        ];
+        const existing = await query('SELECT * FROM CART WHERE userId = ?', [
+            id,
+        ]);
+        // console.log(existing);
+        if (!existing || existing.length === 0) {
+            ctx.status = 200;
+            ctx.body = {
+                items: [],
+            };
+            return;
+        }
+        const { items } = existing[0];
+        // console.log(items);
+        // const mockCarts = [
+        //     {
+        //         id: 0,
+        //         customerId: id,
+        //         itemId: 0,
+        //         count: 1,
+        //         status: '',
+        //         paidDtm: '',
+        //         createAt: '',
+        //         updateAt: '',
+        //         item: {
+        //             id: 0,
+        //             title: '뼈다귀 모양 베개',
+        //             description: '우리 귀여운 강아지에게 꿀잠을!!',
+        //             price: 10000,
+        //             image:
+        //                 'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg',
+        //             detailContents: `[\"아이에게 꿀잠을 선사할 수 있는 베개입니다.\",
+        //             \"뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.\",
+        //             \"가나다라 마바사 아자차카 타파하\",
+        //             \"\",
+        //             \"테스트 라인 입니다\",
+        //             \"테스트 라인 입니다\",
+        //             \"테스트 라인 입니다\",
+        //             \"테스트 라인 입니다\",
+        //             \"테스트 라인 입니다\"]`,
+        //             createAt: '',
+        //             updateAt: '',
+        //         },
+        //     },
+        // ];
         ctx.body = {
             message: '',
-            items: mockCarts,
+            items: JSON.parse(items),
         };
         ctx.status = 200;
     } catch (e) {

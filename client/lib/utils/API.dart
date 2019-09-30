@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:client/models/CartInfo.dart';
 import 'package:client/models/CustomerHasItemResponse.dart';
 import 'package:client/models/ProfileResponse.dart';
 import 'package:http/http.dart' as http;
@@ -10,19 +11,22 @@ import 'package:shared_preferences/shared_preferences.dart';
 class API {
   static Future<void> register(
       String email, String name, String address, String password) async {
-    return await post('/api/customers', {
-      'values': json.encode({
-        'email': email,
-        'name': name,
-        'address': address,
-        'password': password,
-      })
-    });
+    return await post(
+        '/api/customers',
+        {
+          'values': json.encode({
+            'email': email,
+            'name': name,
+            'address': address,
+            'password': password,
+          }),
+        },
+        null);
   }
 
   static Future<LoginResponse> signIn(String email, String password) async {
     final res = await post('/api/login',
-        {'type': 'CUSTOMER', 'loginId': email, 'password': password});
+        {'type': 'CUSTOMER', 'loginId': email, 'password': password}, null);
 
     return LoginResponse.fromJson(json.decode(res.body)['items'][0]);
   }
@@ -43,6 +47,7 @@ class API {
     final res = await get('/api/custom-has-items',
         {'options': json.encode(query)}, {'authorization': token});
 
+    print(json.decode(res.body)['items'][0]['id']);
     return json
         .decode(res.body)['items']
         .map<CustomerHasItemResponse>(
@@ -71,6 +76,16 @@ class API {
     });
   }
 
+  static Future<void> createCart(String items) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return await post('/api/custom-has-items', {
+      'values': json.encode({'items': items})
+    }, {
+      'authorization': token
+    });
+  }
+
   static Future<http.Response> get(String path, Map<String, String> query,
       Map<String, String> headers) async {
     final uri = Uri(queryParameters: query);
@@ -80,16 +95,18 @@ class API {
     return requestTail(res);
   }
 
-  static Future<http.Response> post(
-      String path, Map<String, String> body) async {
-    final res = await http.post(Global.localServerAddress + path, body: body);
+  static Future<http.Response> post(String path, Map<String, String> body,
+      Map<String, String> headers) async {
+    final res = await http.post(Global.localServerAddress + path,
+        body: body, headers: headers);
 
     return requestTail(res);
   }
 
   static Future<http.Response> put(String path, Map<String, String> body,
       Map<String, String> headers) async {
-    final res = await http.put(Global.localServerAddress + path, body: body);
+    final res = await http.put(Global.localServerAddress + path,
+        body: body, headers: headers);
     return requestTail(res);
   }
 

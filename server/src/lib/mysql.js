@@ -21,9 +21,14 @@ exports.query = (query, params) => {
         if (!pool) reject();
 
         pool.getConnection((err, conn) => {
-            if (err) reject(err);
+            if (err) {
+                console.log(err);
+                reject(err);
+            }
             conn.query(query, params, (err, results) => {
-                if (err) reject(err);
+                if (err) {
+                    console.log(err);
+                }
                 conn.release();
                 resolve(results);
             });

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:client/models/CartInfo.dart';
 import 'package:client/models/ItemInfo.dart';
+import 'package:client/utils/API.dart';
 import 'package:client/utils/Global.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -87,6 +89,31 @@ class _ItemDetailState extends State<ItemDetail> {
     final count =
         (countController.text == '') ? 0 : int.parse(countController.text);
     return StringUtil.makeCommaedString(itemInfo.price * count);
+  }
+
+  Future<void> createCart() async {
+    if (countController.text == '' || countController.text == '0') {
+      return;
+    }
+    try {
+      // int id;
+      // Image image;
+      // String title;
+      // int price;
+      // int count;
+      // bool isChecked = true;
+
+      await API.createCart(json.encode({
+        'id': itemInfo.id,
+        'title': itemInfo.title,
+        'price': itemInfo.price,
+        'count': int.parse(countController.text),
+      }));
+    } on ServerApiException catch (e) {
+      print(e.toString());
+    } catch (e) {
+      print(e.toString());
+    }
   }
 
   @override
@@ -191,7 +218,8 @@ class _ItemDetailState extends State<ItemDetail> {
                 textColor: Colors.white,
                 padding: EdgeInsets.only(top: 10, bottom: 10),
                 child: Text('장바구니에 넣기', style: TextStyle(fontSize: 16)),
-                onPressed: () {
+                onPressed: () async {
+                  await createCart();
                   Navigator.pop(context, ItemDetailResult.ADD_TO_CART);
                 },
               ))

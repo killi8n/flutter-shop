@@ -98,6 +98,9 @@ class _ProfileState extends State<Profile> {
           .scaffoldKey
           .currentState
           .showSnackBar(SnackBar(content: Text('수정이 완료되었습니다')));
+      setState(() {
+        isLoading = false;
+      });
     } on ServerApiException catch (e) {
       setState(() {
         isLoading = false;

@@ -119,7 +119,7 @@ exports.searchCustomer = async ctx => {
                     email: user.email,
                     name: user.name,
                     address: user.address,
-                    phoneNumber: '010-1234-1234',
+                    phoneNumber: user.phoneNumber,
                     createAt: new Date(),
                     updateAt: new Date(),
                 },
@@ -131,7 +131,6 @@ exports.searchCustomer = async ctx => {
 };
 
 exports.updateCustomer = async ctx => {
-    console.log('updateCustomer');
     let schema = Joi.object().keys({
         values: Joi.string().required(),
     });
@@ -169,12 +168,14 @@ exports.updateCustomer = async ctx => {
 
     const { email, address, phoneNumber } = values;
     const { authorization: token } = ctx.request.headers;
+
     try {
         const decoded = await decodeToken(token);
+
         const { id } = decoded;
 
         const user = await query('SELECT * FROM USER WHERE id = ?', [id]);
-        // console.log(user);
+
         if (!user || user.length === 0) {
             ctx.status = 404;
             ctx.body = {
@@ -184,7 +185,7 @@ exports.updateCustomer = async ctx => {
         }
 
         await query(
-            'UPDATE USER email = ?, address = ?, phoneNumber = ? WHERE id = ?',
+            'UPDATE USER SET email = ?, address = ?, phoneNumber = ? WHERE id = ?',
             [email, address, phoneNumber, id]
         );
 
