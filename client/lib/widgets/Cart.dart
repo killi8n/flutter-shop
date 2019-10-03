@@ -263,7 +263,29 @@ class _CartState extends State<Cart> {
                   FractionallySizedBox(
                     child: FlatButton(
                       child: Text('구매하기'),
-                      onPressed: () {},
+                      onPressed: () async {
+                        setState(() {
+                          isLoading = true;
+                        });
+
+                        for (final cart in cartInfos) {
+                          if (!cart.isChecked) {
+                            continue;
+                          }
+
+                          final countText = itemIdControllerMap[cart.id].text;
+                          if (countText == '') {
+                            continue;
+                          } else {
+                            await API.updateCart(cart.id,
+                                (countText == '') ? 0 : int.parse(countText));
+                          }
+                        }
+
+                        setState(() {
+                          isLoading = false;
+                        });
+                      },
                       color: Colors.pinkAccent,
                       textColor: Colors.white,
                     ),

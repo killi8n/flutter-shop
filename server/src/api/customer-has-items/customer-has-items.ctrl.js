@@ -147,7 +147,67 @@ exports.getById = async ctx => {
 };
 
 exports.updateById = async ctx => {
+    console.log('updateByid');
+    const { id } = ctx.params;
+    const { authorization: token } = ctx.request.headers;
+
+    let schema = Joi.object().keys({
+        values: Joi.string().required(),
+    });
+
+    let validate = Joi.validate(ctx.request.body, schema);
+
+    if (validate.error) {
+        console.log(validate.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: 'invalid body',
+        };
+        return;
+    }
+
+    schema = Joi.object().keys({
+        count: Joi.number().required(),
+    });
+
+    validate = Joi.validate(JSON.parse(ctx.request.body.values), schema);
+
+    if (validate.error) {
+        console.log(validate.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: 'invalid body',
+        };
+        return;
+    }
+
+    const { count } = JSON.parse(ctx.request.body.values);
+
     try {
+        const decoded = await decodeToken(token);
+        const { id: userId } = decoded;
+
+        const existing = await query('SELECT * FROM CART WHERE userId = ?', [
+            userId,
+        ]);
+
+        const existingItems = JSON.parse(existing[0].items);
+
+        const newItems = existingItems.map(item => {
+            if (item.itemId === id) {
+                return {
+                    itemId: id,
+                    count,
+                };
+            }
+            return item;
+        });
+
+        await query('UPDATE CART SET items = ? WHERE userId = ?', [
+            JSON.stringify(newItems),
+            userId,
+        ]);
+
         ctx.body = {
             success: true,
         };

@@ -85,6 +85,16 @@ class API {
     });
   }
 
+  static Future<void> updateCart(int itemId, int count) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return await put('/api/cusom-has-items/${itemId}', {
+      'values': json.encode({'count': count})
+    }, {
+      'authorization': token
+    });
+  }
+
   static Future<http.Response> get(String path, Map<String, String> query,
       Map<String, String> headers) async {
     final uri = Uri(queryParameters: query);
