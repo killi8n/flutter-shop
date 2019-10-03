@@ -3,7 +3,6 @@ const { decodeToken } = require('../../lib/token');
 const { query } = require('../../lib/mysql');
 
 exports.create = async ctx => {
-    console.log('create');
     const { authorization: token } = ctx.request.headers;
 
     let schema = Joi.object().keys({
@@ -24,7 +23,8 @@ exports.create = async ctx => {
     const { values } = ctx.request.body;
 
     schema = Joi.object().keys({
-        items: Joi.string().required(),
+        itemId: Joi.number().required(),
+        count: Joi.number().required(),
     });
 
     validate = Joi.validate(JSON.parse(values), schema);
@@ -38,29 +38,31 @@ exports.create = async ctx => {
         return;
     }
 
-    const { items } = JSON.parse(values);
+    const { itemId, count } = JSON.parse(values);
 
     try {
         const decoded = await decodeToken(token);
-        const { id } = decoded;
+        const { id: userId } = decoded;
 
         const existing = await query('SELECT * FROM CART WHERE userId = ?', [
-            id,
+            userId,
         ]);
 
         if (existing.length === 1) {
             const existingItems = JSON.parse(existing[0].items);
-            const newItem = JSON.parse(items);
-            const concattedItems = [...existingItems, newItem];
-
+            const newItem = {
+                itemId,
+                count,
+            };
+            const newItems = [...existingItems, newItem];
             await query('UPDATE CART SET items = ? WHERE userId = ?', [
-                JSON.stringify(concattedItems),
-                id,
+                JSON.stringify(newItems),
+                userId,
             ]);
         } else {
             await query(`INSERT INTO CART (userId, items) VALUES (?, ?)`, [
-                id,
-                JSON.stringify([JSON.parse(items)]),
+                userId,
+                JSON.stringify([{ itemId, count }]),
             ]);
         }
 
@@ -84,7 +86,7 @@ exports.getAll = async ctx => {
         const existing = await query('SELECT * FROM CART WHERE userId = ?', [
             id,
         ]);
-        // console.log(existing);
+
         if (!existing || existing.length === 0) {
             ctx.status = 200;
             ctx.body = {
@@ -92,42 +94,35 @@ exports.getAll = async ctx => {
             };
             return;
         }
-        const { items } = existing[0];
-        // console.log(items);
-        // const mockCarts = [
-        //     {
-        //         id: 0,
-        //         customerId: id,
-        //         itemId: 0,
-        //         count: 1,
-        //         status: '',
-        //         paidDtm: '',
-        //         createAt: '',
-        //         updateAt: '',
-        //         item: {
-        //             id: 0,
-        //             title: '뼈다귀 모양 베개',
-        //             description: '우리 귀여운 강아지에게 꿀잠을!!',
-        //             price: 10000,
-        //             image:
-        //                 'http://thumbnail.10x10.co.kr/webimage/image/basic600/137/B001377515.jpg',
-        //             detailContents: `[\"아이에게 꿀잠을 선사할 수 있는 베개입니다.\",
-        //             \"뼈다귀 모양이므로 강아지에게 뼈다귀를 뜯는 꿈을 꿀 수 있도록 합니다.\",
-        //             \"가나다라 마바사 아자차카 타파하\",
-        //             \"\",
-        //             \"테스트 라인 입니다\",
-        //             \"테스트 라인 입니다\",
-        //             \"테스트 라인 입니다\",
-        //             \"테스트 라인 입니다\",
-        //             \"테스트 라인 입니다\"]`,
-        //             createAt: '',
-        //             updateAt: '',
-        //         },
-        //     },
-        // ];
+        const { items: carts } = existing[0];
+
+        const items = await Promise.all(
+            JSON.parse(carts)
+                .map(async cart => {
+                    try {
+                        const item = await query(
+                            'SELECT * FROM ITEM WHERE id = ?',
+                            [cart.itemId]
+                        );
+                        return {
+                            ...item[0],
+                            count: cart.count,
+                        };
+                    } catch (e) {
+                        console.log(e);
+                        ctx.status = 500;
+                        ctx.body = {
+                            message: 'internal server error',
+                        };
+                        return;
+                    }
+                })
+                .reverse()
+        );
+
         ctx.body = {
             message: '',
-            items: JSON.parse(items),
+            items,
         };
         ctx.status = 200;
     } catch (e) {

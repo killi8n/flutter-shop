@@ -47,7 +47,6 @@ class API {
     final res = await get('/api/custom-has-items',
         {'options': json.encode(query)}, {'authorization': token});
 
-    print(json.decode(res.body)['items'][0]['id']);
     return json
         .decode(res.body)['items']
         .map<CustomerHasItemResponse>(
@@ -76,11 +75,11 @@ class API {
     });
   }
 
-  static Future<void> createCart(String items) async {
+  static Future<void> createCart(int itemId, int count) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     return await post('/api/custom-has-items', {
-      'values': json.encode({'items': items})
+      'values': json.encode({'itemId': itemId, 'count': count})
     }, {
       'authorization': token
     });

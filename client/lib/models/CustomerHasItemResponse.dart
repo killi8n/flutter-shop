@@ -2,24 +2,44 @@ import 'package:client/models/ItemResponse.dart';
 
 class CustomerHasItemResponse {
   int id;
-  int customerId;
-  int itemId;
+  String title;
+  String description;
+  int price;
+  String image;
   int count;
-  String status;
-  String paidDtm;
-  ItemResponse item;
+  List<String> detailContents;
+  String createAt;
+  String updateAt;
 
-  CustomerHasItemResponse(this.id, this.customerId, this.itemId, this.count,
-      this.status, this.paidDtm, this.item);
+  // int id;
+  // int customerId;
+  // int itemId;
+  // int count;
+  // String status;
+  // String paidDtm;
+  // ItemResponse item;
+
+  CustomerHasItemResponse(
+      this.id,
+      this.title,
+      this.description,
+      this.price,
+      this.image,
+      this.count,
+      this.detailContents,
+      this.createAt,
+      this.updateAt);
   factory CustomerHasItemResponse.fromJson(Map<String, dynamic> json) {
     return CustomerHasItemResponse(
       json['id'],
-      json['customerId'],
-      json['itemId'],
+      json['title'],
+      json['description'],
+      json['price'],
+      json['image'],
       json['count'],
-      json['status'],
-      json['paidDtm'],
-      ItemResponse.fromJson(json['item']),
+      json['detailContent'],
+      json['createAt'],
+      json['updateAt'],
     );
   }
 }

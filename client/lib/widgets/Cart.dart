@@ -24,9 +24,10 @@ class _CartState extends State<Cart> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    // cartInfos = [];
     cartInfos = Global.prevCustomerHasItems
-        .map((item) => CartInfo(item.id, Image.network(item.item.image),
-            item.item.title, item.item.price, item.count))
+        .map((item) => CartInfo(item.id, Image.network(item.image), item.title,
+            item.price, item.count))
         .toList();
     fetchDataAndRefresh();
   }
@@ -54,8 +55,6 @@ class _CartState extends State<Cart> {
         ]
       });
 
-      print(customerHasItems);
-
       await Future.delayed(Duration(seconds: 1));
       Global.prevCustomerHasItems = customerHasItems;
 
@@ -64,8 +63,8 @@ class _CartState extends State<Cart> {
       }
 
       final newItemsInfos = customerHasItems
-          .map((item) => CartInfo(item.id, Image.network(item.item.image),
-              item.item.title, item.item.price, item.count))
+          .map((item) => CartInfo(item.id, Image.network(item.image),
+              item.title, item.price, item.count))
           .toList();
 
       setState(() {
@@ -91,6 +90,7 @@ class _CartState extends State<Cart> {
     for (final info in cartInfos) {
       if (itemIdControllerMap.containsKey(info.id)) {
         itemIdControllerMap[info.id].text = '${info.count}';
+
         continue;
       }
 

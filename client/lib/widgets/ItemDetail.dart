@@ -103,12 +103,9 @@ class _ItemDetailState extends State<ItemDetail> {
       // int count;
       // bool isChecked = true;
 
-      await API.createCart(json.encode({
-        'id': itemInfo.id,
-        'title': itemInfo.title,
-        'price': itemInfo.price,
-        'count': int.parse(countController.text),
-      }));
+      await API.createCart(itemInfo.id, int.parse(countController.text));
+
+      Navigator.pop(context, ItemDetailResult.ADD_TO_CART);
     } on ServerApiException catch (e) {
       print(e.toString());
     } catch (e) {
@@ -220,7 +217,6 @@ class _ItemDetailState extends State<ItemDetail> {
                 child: Text('장바구니에 넣기', style: TextStyle(fontSize: 16)),
                 onPressed: () async {
                   await createCart();
-                  Navigator.pop(context, ItemDetailResult.ADD_TO_CART);
                 },
               ))
         ],
