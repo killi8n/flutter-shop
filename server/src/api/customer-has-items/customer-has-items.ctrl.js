@@ -147,7 +147,6 @@ exports.getById = async ctx => {
 };
 
 exports.updateById = async ctx => {
-    console.log('updateByid');
     const { id } = ctx.params;
     const { authorization: token } = ctx.request.headers;
 
@@ -193,18 +192,20 @@ exports.updateById = async ctx => {
 
         const existingItems = JSON.parse(existing[0].items);
 
-        const newItems = existingItems.map(item => {
-            if (item.itemId === id) {
+        let newItems = existingItems.map(item => {
+            if (item.itemId === parseInt(id, 10)) {
                 return {
-                    itemId: id,
+                    itemId: parseInt(id, 10),
                     count,
                 };
             }
             return item;
         });
 
+        newItems = JSON.stringify(newItems);
+
         await query('UPDATE CART SET items = ? WHERE userId = ?', [
-            JSON.stringify(newItems),
+            newItems,
             userId,
         ]);
 
@@ -219,7 +220,75 @@ exports.updateById = async ctx => {
 };
 
 exports.pay = async ctx => {
+    const { authorization: token } = ctx.request.headers;
+
+    let schema = Joi.object().keys({
+        values: Joi.string().required(),
+    });
+
+    let validate = Joi.validate(ctx.request.body, schema);
+
+    if (validate.error) {
+        console.log(validate.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: 'invalid body',
+        };
+        return;
+    }
+
+    schema = Joi.object().keys({
+        customerHasItemIds: Joi.array().required(),
+    });
+
+    validate = Joi.validate(JSON.parse(ctx.request.body.values), schema);
+
+    if (validate.error) {
+        console.log(validate.error);
+        ctx.status = 400;
+        ctx.body = {
+            message: 'invalid body',
+        };
+        return;
+    }
+
+    const { values } = ctx.request.body;
+    let { customerHasItemIds } = JSON.parse(values);
+    // customerHasItemIds = JSON.parse(customerHasItemIds);
+
     try {
+        const decoded = await decodeToken(token);
+        const { id: userId } = decoded;
+
+        let existingCart = await query('SELECT * FROM CART WHERE userId = ?', [
+            userId,
+        ]);
+        if (!existingCart || existingCart.length === 0) {
+            ctx.status = 404;
+            ctx.body = {
+                message: 'no cart is existing',
+            };
+            return;
+        }
+
+        existingCart = existingCart[0];
+
+        let { items } = existingCart;
+        items = JSON.parse(items);
+
+        customerHasItemIds.forEach(itemId => {
+            items = items.filter(item => {
+                return item.itemId !== itemId;
+            });
+        });
+
+        items = JSON.stringify(items);
+
+        await query('UPDATE CART SET items = ? WHERE userId = ?', [
+            items,
+            userId,
+        ]);
+
         ctx.body = {
             success: true,
         };

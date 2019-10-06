@@ -88,8 +88,18 @@ class API {
   static Future<void> updateCart(int itemId, int count) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    return await put('/api/cusom-has-items/${itemId}', {
+    return await put('/api/custom-has-items/${itemId}', {
       'values': json.encode({'count': count})
+    }, {
+      'authorization': token
+    });
+  }
+
+  static Future<void> payCustomerHasItems(List<int> customerHasItemIds) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    return await post('/api/custom-has-items/pay', {
+      'values': json.encode({'customerHasItemIds': customerHasItemIds})
     }, {
       'authorization': token
     });

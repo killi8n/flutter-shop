@@ -268,18 +268,39 @@ class _CartState extends State<Cart> {
                           isLoading = true;
                         });
 
-                        for (final cart in cartInfos) {
-                          if (!cart.isChecked) {
-                            continue;
+                        final checkedIds = <int>[];
+                        // for(final cart in cartInfos) {
+                        //   if(cart.isChecked == false) {
+                        //     continue;
+                        //   }
+                        //   final countText = itemIdControllerMap[cart.id].text;
+                        //   await
+                        // }
+
+                        try {
+                          for (final cart in cartInfos) {
+                            if (!cart.isChecked) {
+                              continue;
+                            }
+
+                            final countText = itemIdControllerMap[cart.id].text;
+                            if (countText == '' || countText == '0') {
+                              continue;
+                            } else {
+                              await API.updateCart(
+                                  cart.id, int.parse(countText));
+                            }
+                            checkedIds.add(cart.id);
                           }
 
-                          final countText = itemIdControllerMap[cart.id].text;
-                          if (countText == '') {
-                            continue;
-                          } else {
-                            await API.updateCart(cart.id,
-                                (countText == '') ? 0 : int.parse(countText));
+                          if (checkedIds.length > 0) {
+                            await API.payCustomerHasItems(checkedIds);
+                            this.fetchDataAndRefresh();
                           }
+                        } on ServerApiException catch (e) {
+                          print(e.toString());
+                        } catch (e) {
+                          print(e.toString());
                         }
 
                         setState(() {
